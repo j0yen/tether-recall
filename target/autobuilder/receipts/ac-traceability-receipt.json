@@ -1,0 +1,37 @@
+{
+  "schema": "autobuilder.ac_traceability_receipt.v1",
+  "head_sha": "7a7e42ed6ee5d4f36ed4c0a7d2ed2caf3dbaa007",
+  "verdict": "pass",
+  "ac_to_test_mapping": [
+    {
+      "id": "AC1",
+      "test": "tests/acceptance_ac1.rs::ac1_fixture_query_returns_expected_hits"
+    },
+    {
+      "id": "AC2",
+      "test": "tests/acceptance_ac2.rs"
+    },
+    {
+      "id": "AC3",
+      "test": "tests/acceptance_ac3.rs"
+    },
+    {
+      "id": "AC4",
+      "test": "tests/acceptance_ac4.rs"
+    },
+    {
+      "id": "AC5",
+      "test": "tests/acceptance_ac5.rs"
+    },
+    {
+      "id": "AC6",
+      "test": "tests/mocks_ac6.rs (deferred_acs mock)",
+      "deferred": true
+    },
+    {
+      "id": "AC7",
+      "test": "tests/acceptance_ac7.rs"
+    }
+  ],
+  "captured_at": "2026-06-18T07:01:42Z"
+}

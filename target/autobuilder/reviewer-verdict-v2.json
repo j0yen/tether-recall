@@ -1,0 +1,38 @@
+{
+  "schema": "autobuilder.reviewer_verdict.v1",
+  "head_sha": "7a7e42ed6ee5d4f36ed4c0a7d2ed2caf3dbaa007",
+  "intent_card_sha": "26449fc7b871ff738664b8f1c652b4fab9d63bd8a7573a022c61817ae5f3bace",
+  "decision": "concern",
+  "block_reasons": [],
+  "concern_reasons": [
+    {
+      "id": "ac2-truncated-flag-bug",
+      "note": "Production code sets truncated=true when limit>cap regardless of actual hit count; test asserts reimplemented predicate not production expression"
+    },
+    {
+      "id": "ac3-no-golden-compare",
+      "note": "AC3 tests field shape only, not rendered stdout columns"
+    },
+    {
+      "id": "handle-query-no-coverage",
+      "note": "real handle_query/run_serve path has zero integration test coverage"
+    },
+    {
+      "id": "orphaned-dead-file",
+      "note": "tests/mocks/ac6.rs is dead (not wired); should be deleted"
+    }
+  ],
+  "falsification": {
+    "test_audit": "AC2 snippet truncation and AC4 read-only invariant are well-covered. AC1/AC5/AC7 tests are honest and verify the stated behaviors. AC2 truncated-flag and AC3 output-format tests are shallow — they assert reimplemented logic or field shape rather than the production behavior.",
+    "panic_audit": "No unwrap/expect/panic in src/ on the happy path. SystemTime operations use .context(). The only expect() is in test helpers and is expected. Clean.",
+    "unsafe_audit": "No unsafe present. #![deny(unsafe_code)] in both lib.rs and main.rs. deny_unsafe: true honored throughout.",
+    "public_api_audit": "limit=usize::MAX is safe (clamped by min). Malformed recall JSON returns Err (not panic). No UB reachable on the public API surface.",
+    "deps_audit": "11 deps (≤ max_deps 12). All mainstream crates. futures-util added legitimately for StreamExt on async-nats Subscriber. No new advisory crates.",
+    "drift_audit": "iter-1 diff is API-compat/clippy/test fixes only. Cargo.toml/clippy.toml/rust-toolchain.toml are expected config changes. No scope drift from PRD.",
+    "counter_attack": {
+      "description": "A test that calls handle_query with limit=100/cap=50 and a stub recall returning only 3 hits would expose the truncated=true-when-nothing-clamped bug.",
+      "test_skeleton": "#[test] fn would_break_truncated_flag_when_few_hits() { /* limit=100, cap=50, recall returns 3 hits; truncated should be false but production code sets it true */ unimplemented!() }"
+    }
+  },
+  "reviewed_at": "2026-06-18T07:05:11Z"
+}

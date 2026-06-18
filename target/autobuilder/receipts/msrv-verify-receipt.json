@@ -1,0 +1,8 @@
+{
+  "schema": "autobuilder.msrv_verify_receipt.v1",
+  "head_sha": "7a7e42ed6ee5d4f36ed4c0a7d2ed2caf3dbaa007",
+  "verdict": "pass",
+  "msrv": "1.88",
+  "toolchain_used": "1.88.0-x86_64-unknown-linux-gnu",
+  "captured_at": "2026-06-18T07:01:26Z"
+}

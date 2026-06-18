@@ -1,0 +1,30 @@
+{
+  "schema": "autobuilder.review_request.v1",
+  "head_sha": "7a7e42ed6ee5d4f36ed4c0a7d2ed2caf3dbaa007",
+  "base_ref": "HEAD~1",
+  "base_sha": "43f09bbc40d9c509f4de399f9a9ecc1927377c97",
+  "intent_card_sha256": "sha256:26449fc7b871ff738664b8f1c652b4fab9d63bd8a7573a022c61817ae5f3bace",
+  "intent_card_path": "agent/intent-card.json",
+  "commit_count": 1,
+  "commits": [
+    {
+      "sha": "7a7e42ed6ee5d4f36ed4c0a7d2ed2caf3dbaa007",
+      "subject": "iter-1: fix API compat, clippy, test issues — all gates green"
+    }
+  ],
+  "changed_files": [
+    "Cargo.toml",
+    "clippy.toml",
+    "rust-toolchain.toml",
+    "src/lib.rs",
+    "src/main.rs",
+    "src/protocol.rs",
+    "src/requester.rs",
+    "src/responder.rs",
+    "tests/acceptance_ac1.rs",
+    "tests/mocks.rs",
+    "tests/mocks_ac6.rs",
+    "tests/proptest_invariants.rs"
+  ],
+  "captured_at": "2026-06-18T07:01:59Z"
+}

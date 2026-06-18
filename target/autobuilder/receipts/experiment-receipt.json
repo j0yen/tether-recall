@@ -1,0 +1,7 @@
+{
+  "schema": "autobuilder.experiment_receipt.v1",
+  "head_sha": "7a7e42ed6ee5d4f36ed4c0a7d2ed2caf3dbaa007",
+  "verdict": "pass",
+  "iterations_completed": 2,
+  "captured_at": "2026-06-18T07:01:42Z"
+}

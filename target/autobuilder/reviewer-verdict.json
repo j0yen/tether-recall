@@ -1,0 +1,46 @@
+{
+  "schema": "autobuilder.reviewer_verdict.v1",
+  "head_sha": "7a7e42ed6ee5d4f36ed4c0a7d2ed2caf3dbaa007",
+  "verdict": "concern",
+  "concern_summary": "AC2 'truncated' flag: the test (ac2_truncated_flag_semantics) asserts a reimplemented predicate (req.limit > effective_limit), NOT the production code at responder.rs:140 which is `hits.len() < req.limit.min(limit_cap+1) && req.limit > effective_limit`. The real code sets truncated=true even when no clamping occurred (e.g. limit=100, cap=50, but recall returns only 3 hits), violating the AC's 'truncated:true set when clamping occurred'. handle_query (the real responder path) has zero test coverage. Load-bearing parts of AC2 (snippet/hit bounding) and the AC4 read-only invariant are sound. Also: orphaned tests/mocks/ac6.rs (dead file, no longer wired by tests/mocks.rs).",
+  "ac_verdicts": [
+    {
+      "id": "AC1",
+      "behavior_match": "yes",
+      "notes": "Stub recall on PATH returns known JSON; ac1_fixture_query_returns_expected_hits asserts id/kind/subject/score and non-empty bounded snippet via invoke_recall. Honest. Minor: exercises invoke_recall directly rather than the full NATS handle_query path, but the AC's substance (parse fixture -> typed hit fields) is verified."
+    },
+    {
+      "id": "AC2",
+      "behavior_match": "partial",
+      "notes": "Snippet truncation (truncate_snippet) and hit-cap (.take(effective_limit)) are correctly implemented and proptest-verified (prop_truncate_never_exceeds_max). BUT the `truncated` flag in production (responder.rs:140) is buggy: it can report truncated=true when no clamping occurred (requested limit > cap but fewer real hits than cap). The test asserts an inlined predicate, not the production expression, so it passes while the AC's 'truncated when clamping occurred' is violated. Dishonest test on a MUST AC."
+    },
+    {
+      "id": "AC3",
+      "behavior_match": "partial",
+      "notes": "ac3 does NOT capture stdout from print_hits; it only asserts QueryResponse field shape and descending score order. The AC says 'prints ranked hits... golden-compared' but there is no golden comparison of actual rendered output. print_hits is exercised only by smoke (no-panic) tests in requester.rs. The column format is plausibly correct on read, but the AC's golden-compare claim is not honored by the test."
+    },
+    {
+      "id": "AC4",
+      "behavior_match": "yes",
+      "notes": "Strong. is_mutating_verb covers all MUTATING_VERBS case-insensitively; handle_query checks verb before any subprocess call; grep-assert (ac4_no_write_path_in_source) confirms responder only ever passes .arg(\"query\") and never write/forget/delete/insert/upsert. Read-only invariant holds: no write path is wired. invoke_recall hardcodes the `query` subcommand."
+    },
+    {
+      "id": "AC5",
+      "behavior_match": "yes",
+      "notes": "ac5_query_times_out_without_responder asserts run_query returns Err and completes within timeout+buffer against a non-listening port. Does not hang. run_query uses tokio::time::timeout and returns non-zero (Err -> non-zero exit via main). Honest."
+    },
+    {
+      "id": "AC6",
+      "behavior_match": "yes",
+      "notes": "SHOULD/deferred. Correctly relocated from orphaned tests/mocks/ac6.rs to top-level tests/mocks_ac6.rs (a real integration binary that actually runs) -- this avoids the known orphaned-mock false-green trap. fake_responder mirrors handle_query logic (verb reject, take(effective_limit), truncate); asserts req_id echo, required fields, one-reply-per-request, mutating reject. Note: fake_responder is a parallel reimplementation, so it does not exercise the real handle_query truncated bug."
+    },
+    {
+      "id": "AC7",
+      "behavior_match": "yes",
+      "notes": "sigpipe::reset() is first call in main() (grep-asserted + visually confirmed at main.rs:84); no sh -c / Command::new(sh|bash); args built via .arg() programmatically with TokioCommand::new(recall_binary). No shell metacharacter exposure. sigpipe dep present. Honest."
+    }
+  ],
+  "overall_notes": "Phase A concern (ships with logged warning). Block conditions: NONE trigger -- no MUST AC is hard-failing per the EvidencePack, no unsafe (deny_unsafe honored, #![deny(unsafe_code)] in lib+main), no non-goal contradicted (no write-back path), deps are all mainstream (clap/serde/async-nats/tokio/uuid/anyhow/tracing/futures-util/sigpipe; 11 deps <= max_deps 12), no out-of-src file modified without amendment (Cargo.toml/clippy.toml/rust-toolchain.toml are build config, expected in iter-1 'fix API compat' commit). Concerns (advisory): (1) AC2 truncated-flag is buggy AND its test is dishonest -- tests inlined logic not production expression; (2) AC3 claims golden-compare but never captures/compares rendered stdout; (3) the real responder path (handle_query/run_serve) has no integration test -- all AC1-AC5 verification routes around it via invoke_recall/predicate reimplementation; (4) orphaned dead file tests/mocks/ac6.rs should be removed. Counter-attack: a test that drives handle_query (or even just the truncated expression with limit=100/cap=50/3-hit fixture) would expose truncated=true-when-nothing-clamped. FALSIFICATION: panic_audit -- the only unwrap/expect in src/ are in test modules and a documented system-clock SystemTime path guarded with context(); no panics on the public happy path. unsafe_audit -- no unsafe present (deny_unsafe enforced via attribute). public_api_audit -- a caller passing limit=usize::MAX is safe (min clamps); malformed recall JSON yields Err not panic; no UB reachable. deps_audit -- no new unreviewed/advisory crates vs baseline; futures-util added legitimately for StreamExt. drift_audit -- iter-1 diff is API-compat/clippy/test fixes only (RawHit made pub+doc'd, ping var rename, mock relocation, lint comment removals); no scope drift. Recommend the edit-agent fix the truncated expression to `hits.len() < raw_hit_count` (true clamping) and add a handle_query integration test.",
+  "reviewed_at": "2026-06-18T07:05:00Z",
+  "intent_card_sha": "26449fc7b871ff738664b8f1c652b4fab9d63bd8a7573a022c61817ae5f3bace"
+}

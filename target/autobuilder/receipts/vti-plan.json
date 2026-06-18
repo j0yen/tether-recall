@@ -1,0 +1,106 @@
+{
+  "base_ref": "HEAD~1",
+  "base_sha": "43f09bbc40d9c509f4de399f9a9ecc1927377c97",
+  "captured_at": "2026-06-18T07:00:08Z",
+  "head_sha": "7a7e42ed6ee5d4f36ed4c0a7d2ed2caf3dbaa007",
+  "min_confidence": 0.7,
+  "proof_lanes_path": "agent/proof-lanes.toml",
+  "proof_lanes_sha256": "sha256:c3b485cbc4863338e58a3a4974f8fd054b6d17800123bd5e4f210426d40136cf",
+  "receipt_digest": "sha256:cdfc5e6ceac2675306151f17731b71713193e828c674a71e405310793846156b",
+  "required_commands": [
+    "cargo check --workspace",
+    "cargo clippy --workspace -- -D warnings",
+    "cargo deny check",
+    "cargo test --workspace",
+    "exit 1"
+  ],
+  "routes": [
+    {
+      "confidence": 1.0,
+      "lanes": [
+        "deps"
+      ],
+      "path": "Cargo.toml"
+    },
+    {
+      "confidence": 1.0,
+      "lanes": [
+        "harness-readonly"
+      ],
+      "path": "clippy.toml"
+    },
+    {
+      "confidence": 1.0,
+      "lanes": [
+        "harness-readonly"
+      ],
+      "path": "rust-toolchain.toml"
+    },
+    {
+      "confidence": 1.0,
+      "lanes": [
+        "rust-source"
+      ],
+      "path": "src/lib.rs"
+    },
+    {
+      "confidence": 1.0,
+      "lanes": [
+        "rust-source"
+      ],
+      "path": "src/main.rs"
+    },
+    {
+      "confidence": 1.0,
+      "lanes": [
+        "rust-source"
+      ],
+      "path": "src/protocol.rs"
+    },
+    {
+      "confidence": 1.0,
+      "lanes": [
+        "rust-source"
+      ],
+      "path": "src/requester.rs"
+    },
+    {
+      "confidence": 1.0,
+      "lanes": [
+        "rust-source"
+      ],
+      "path": "src/responder.rs"
+    },
+    {
+      "confidence": 1.0,
+      "lanes": [
+        "rust-tests"
+      ],
+      "path": "tests/acceptance_ac1.rs"
+    },
+    {
+      "confidence": 1.0,
+      "lanes": [
+        "rust-tests"
+      ],
+      "path": "tests/mocks.rs"
+    },
+    {
+      "confidence": 1.0,
+      "lanes": [
+        "rust-tests"
+      ],
+      "path": "tests/mocks_ac6.rs"
+    },
+    {
+      "confidence": 1.0,
+      "lanes": [
+        "rust-tests"
+      ],
+      "path": "tests/proptest_invariants.rs"
+    }
+  ],
+  "schema": "autobuilder.vti_plan_receipt.v1",
+  "unrouted_paths": [],
+  "verdict": "pass"
+}
