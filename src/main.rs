@@ -29,7 +29,7 @@ use protocol::{DEFAULT_LIMIT, DEFAULT_TIMEOUT_SECS};
     about = "Bridges the laptop's recall store to the work node over the NATS fleet bus"
 )]
 struct Cli {
-    /// NATS server URL (default: nats://localhost:4222)
+    /// NATS server URL (default: `nats://localhost:4222`)
     #[arg(long, env = "WM_NATS_URL", default_value = "nats://localhost:4222")]
     nats_url: String,
 

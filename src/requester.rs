@@ -5,8 +5,9 @@
 //! configured timeout.
 
 use anyhow::{Context, Result};
+use futures_util::StreamExt as _;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use tracing::{debug, info};
+use tracing::debug;
 use uuid::Uuid;
 
 use crate::protocol::{
@@ -20,6 +21,7 @@ use crate::protocol::{
 ///
 /// # Errors
 /// Returns an error on NATS connection failure or on timeout.
+#[allow(clippy::too_many_arguments)]
 pub async fn run_query(
     nats_url: &str,
     text: &str,
@@ -85,7 +87,10 @@ pub async fn run_query(
     .map_err(|_| anyhow::anyhow!("timed out waiting for recall response after {timeout_secs}s"))??;
 
     if let Some(ref err) = response.error {
-        eprintln!("recall query error: {err}");
+        #[allow(clippy::print_stderr)]
+        {
+            eprintln!("recall query error: {err}");
+        }
         std::process::exit(1);
     }
 
@@ -118,19 +123,16 @@ pub async fn run_status(nats_url: &str, timeout_secs: u64) -> Result<()> {
         .try_into()
         .context("timestamp overflow")?;
 
-    let ping = PingRequest {
+    let ping_req = PingRequest {
         ping_id: ping_id.clone(),
         sent_at_ms: now_ms,
     };
 
-    let mut msg = async_nats::Message::new(SUBJECT_PING, serde_json::to_vec(&ping).context("serialize ping")?.into());
-    msg.reply = Some(reply_subject.into());
-
     client
         .publish_with_reply(
             SUBJECT_PING.to_string(),
-            reply_subject.to_string(),
-            serde_json::to_vec(&ping).context("serialize ping")?.into(),
+            reply_subject.clone(),
+            serde_json::to_vec(&ping_req).context("serialize ping")?.into(),
         )
         .await
         .context("failed to publish ping")?;
@@ -138,29 +140,33 @@ pub async fn run_status(nats_url: &str, timeout_secs: u64) -> Result<()> {
     let timeout = Duration::from_secs(timeout_secs);
     match tokio::time::timeout(timeout, pong_sub.next()).await {
         Ok(Some(msg)) => {
-            let pong: PongResponse = serde_json::from_slice(&msg.payload)
+            let pong_resp: PongResponse = serde_json::from_slice(&msg.payload)
                 .context("failed to parse pong response")?;
             let rtt_ms = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .context("system clock error")?
                 .as_millis()
-                .saturating_sub(u128::from(pong.sent_at_ms));
+                .saturating_sub(u128::from(pong_resp.sent_at_ms));
             #[allow(clippy::print_stdout)]
             {
                 println!(
                     "responder: ONLINE  node={node}  rtt={rtt_ms}ms",
-                    node = pong.node,
+                    node = pong_resp.node,
                 );
             }
         }
         Ok(None) => {
-            eprintln!("responder: OFFLINE (subscription closed)");
+            #[allow(clippy::print_stderr)]
+            {
+                eprintln!("responder: OFFLINE (subscription closed)");
+            }
             std::process::exit(1);
         }
         Err(_) => {
-            eprintln!(
-                "responder: OFFLINE (no response within {timeout_secs}s)"
-            );
+            #[allow(clippy::print_stderr)]
+            {
+                eprintln!("responder: OFFLINE (no response within {timeout_secs}s)");
+            }
             std::process::exit(1);
         }
     }
@@ -182,7 +188,7 @@ fn print_hits(response: &QueryResponse) {
     // Header
     #[allow(clippy::print_stdout)]
     {
-        println!("{:<6}  {:<12}  {:<40}  {}", "SCORE", "KIND", "SUBJECT", "SNIPPET");
+        println!("{:<6}  {:<12}  {:<40}  SNIPPET", "SCORE", "KIND", "SUBJECT");
         println!("{}", "-".repeat(80));
     }
     for hit in &response.hits {

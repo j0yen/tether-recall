@@ -8,6 +8,7 @@
 //! - Subprocess arguments are built programmatically (no shell, no interpolation).
 
 use anyhow::{Context, Result};
+use futures_util::StreamExt as _;
 use std::process::Stdio;
 use std::time::Duration;
 use tokio::io::AsyncReadExt;
@@ -81,6 +82,7 @@ pub async fn run_serve(
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 async fn handle_query(
     msg: async_nats::Message,
     client: &async_nats::Client,
@@ -164,7 +166,7 @@ async fn handle_ping(
     client: &async_nats::Client,
     hostname: &str,
 ) -> Result<()> {
-    let ping: PingRequest = match serde_json::from_slice(&msg.payload) {
+    let ping_req: PingRequest = match serde_json::from_slice(&msg.payload) {
         Ok(p) => p,
         Err(e) => {
             warn!(error = %e, "failed to parse ping");
@@ -172,13 +174,13 @@ async fn handle_ping(
         }
     };
 
-    let pong = PongResponse {
-        ping_id: ping.ping_id,
-        sent_at_ms: ping.sent_at_ms,
+    let pong_resp = PongResponse {
+        ping_id: ping_req.ping_id,
+        sent_at_ms: ping_req.sent_at_ms,
         node: hostname.to_string(),
     };
 
-    let payload = serde_json::to_vec(&pong).context("failed to serialize pong")?;
+    let payload = serde_json::to_vec(&pong_resp).context("failed to serialize pong")?;
     // Reply on the reply subject if set, else on a fixed pong subject.
     let reply_subject = msg
         .reply
@@ -209,14 +211,19 @@ async fn publish_response(
 
 /// A raw hit as parsed from recall CLI JSON output.
 #[derive(Debug, serde::Deserialize)]
-struct RawHit {
-    id: String,
-    kind: String,
-    subject: String,
+pub struct RawHit {
+    /// Internal recall entry ID.
+    pub id: String,
+    /// Memory kind.
+    pub kind: String,
+    /// Entry subject.
+    pub subject: String,
+    /// Relevance score.
     #[serde(default)]
-    score: f64,
+    pub score: f64,
+    /// Content snippet.
     #[serde(default)]
-    snippet: String,
+    pub snippet: String,
 }
 
 /// Invoke the `recall` CLI as a subprocess (no shell, arg-built) and return parsed hits.

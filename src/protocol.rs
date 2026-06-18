@@ -29,7 +29,7 @@ pub const SUBJECT_PING: &str = "wm.fleet.recall.ping";
 /// A query request published by the requester on `wm.fleet.recall.query`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QueryRequest {
-    /// Unique request identifier (UUIDv4).
+    /// Unique request identifier (`UUIDv4`).
     pub req_id: String,
     /// Originating node name (informational).
     pub node: String,
@@ -100,6 +100,7 @@ pub struct PongResponse {
 }
 
 /// Verbs that are allowed on the read path.
+#[allow(dead_code)]
 pub const ALLOWED_VERBS: &[&str] = &["query", "search", "list", "get", "find"];
 
 /// Verbs that are always rejected (mutating operations).
@@ -115,7 +116,7 @@ pub fn is_mutating_verb(verb: &str) -> bool {
     MUTATING_VERBS.iter().any(|&mv| lower == mv || lower.starts_with(mv))
 }
 
-fn default_limit() -> usize {
+const fn default_limit() -> usize {
     DEFAULT_LIMIT
 }
 

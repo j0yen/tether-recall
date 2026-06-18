@@ -42,7 +42,6 @@ proptest! {
         prop_assert_eq!(
             lower_result,
             upper_result,
-            "is_mutating_verb should be case-insensitive for '{verb}'"
         );
     }
 }

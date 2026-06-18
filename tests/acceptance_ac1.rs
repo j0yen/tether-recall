@@ -6,7 +6,6 @@
 
 use std::os::unix::fs::PermissionsExt;
 use tempfile::TempDir;
-use tokio::time::{timeout, Duration};
 
 /// Write a stub `recall` script that returns a known JSON fixture.
 fn write_recall_stub(dir: &TempDir, hits_json: &str) -> std::path::PathBuf {
