@@ -1,8 +1,0 @@
-{
-  "schema": "autobuilder.mutation_kill_receipt.v1",
-  "head_sha": "7a7e42ed6ee5d4f36ed4c0a7d2ed2caf3dbaa007",
-  "verdict": "pass",
-  "note": "mutation testing Phase 1 telemetry (not a hard gate); skipped for this build",
-  "mutation_kill_rate": null,
-  "captured_at": "2026-06-18T07:01:42Z"
-}

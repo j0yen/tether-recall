@@ -1,7 +1,0 @@
-{
-  "schema": "autobuilder.session_trace_receipt.v1",
-  "head_sha": "7a7e42ed6ee5d4f36ed4c0a7d2ed2caf3dbaa007",
-  "verdict": "pass",
-  "iterations": 2,
-  "captured_at": "2026-06-18T07:00:39Z"
-}
